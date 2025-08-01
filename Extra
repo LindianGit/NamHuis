@@ -4,3 +4,28 @@ CREATE TABLE [dbo].[AllTable](
 	[occurrence] [int] NULL,
 	[lt] [int] NULL
 ) ON [PRIMARY]
+
+CREATE TABLE [dbo].[stageOne_1](
+	[num1] [int] NULL,
+	[couldhappen] [decimal](10, 5) NULL
+) ON [PRIMARY]
+
+CREATE TABLE [dbo].[stageOne_2](
+	[num2] [int] NULL,
+	[couldhappen] [decimal](10, 5) NULL
+) ON [PRIMARY]
+
+CREATE TABLE [dbo].[stageOne_3](
+	[num2] [int] NULL,
+	[couldhappen] [decimal](10, 5) NULL
+) ON [PRIMARY]
+
+CREATE TABLE [dbo].[stageOne_4](
+	[num2] [int] NULL,
+	[couldhappen] [decimal](10, 5) NULL
+) ON [PRIMARY]
+
+CREATE TABLE [dbo].[stageOne_5](
+	[num2] [int] NULL,
+	[couldhappen] [decimal](10, 5) NULL
+) ON [PRIMARY]
