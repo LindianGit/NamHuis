@@ -1,96 +1,391 @@
-USE [master]
+ USE [master]
 GO
-/****** Object:  Database [Lottery2]    Script Date: 02/08/2025 00:47:39 ******/
-CREATE DATABASE [Lottery2]
+/****** Object:  Database [Lottery]    Script Date: 02/08/2025 01:12:44 ******/
+CREATE DATABASE [Lottery]
  CONTAINMENT = NONE
  ON  PRIMARY 
-( NAME = N'Lottery2', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\Lottery2.mdf' , SIZE = 4288KB , MAXSIZE = UNLIMITED, FILEGROWTH = 1024KB )
+( NAME = N'Lottery', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\Lottery.mdf' , SIZE = 662720KB , MAXSIZE = UNLIMITED, FILEGROWTH = 1024KB )
  LOG ON 
-( NAME = N'Lottery2_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\Lottery2_log.ldf' , SIZE = 1072KB , MAXSIZE = 2048GB , FILEGROWTH = 10%)
+( NAME = N'Lottery_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\Lottery_log.ldf' , SIZE = 770752KB , MAXSIZE = 2048GB , FILEGROWTH = 10%)
 GO
-ALTER DATABASE [Lottery2] SET COMPATIBILITY_LEVEL = 120
+ALTER DATABASE [Lottery] SET COMPATIBILITY_LEVEL = 120
 GO
 IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
 begin
-EXEC [Lottery2].[dbo].[sp_fulltext_database] @action = 'enable'
+EXEC [Lottery].[dbo].[sp_fulltext_database] @action = 'enable'
 end
 GO
-ALTER DATABASE [Lottery2] SET ANSI_NULL_DEFAULT OFF 
+ALTER DATABASE [Lottery] SET ANSI_NULL_DEFAULT OFF 
 GO
-ALTER DATABASE [Lottery2] SET ANSI_NULLS OFF 
+ALTER DATABASE [Lottery] SET ANSI_NULLS OFF 
 GO
-ALTER DATABASE [Lottery2] SET ANSI_PADDING OFF 
+ALTER DATABASE [Lottery] SET ANSI_PADDING OFF 
 GO
-ALTER DATABASE [Lottery2] SET ANSI_WARNINGS OFF 
+ALTER DATABASE [Lottery] SET ANSI_WARNINGS OFF 
 GO
-ALTER DATABASE [Lottery2] SET ARITHABORT OFF 
+ALTER DATABASE [Lottery] SET ARITHABORT OFF 
 GO
-ALTER DATABASE [Lottery2] SET AUTO_CLOSE OFF 
+ALTER DATABASE [Lottery] SET AUTO_CLOSE OFF 
 GO
-ALTER DATABASE [Lottery2] SET AUTO_SHRINK OFF 
+ALTER DATABASE [Lottery] SET AUTO_SHRINK OFF 
 GO
-ALTER DATABASE [Lottery2] SET AUTO_UPDATE_STATISTICS ON 
+ALTER DATABASE [Lottery] SET AUTO_UPDATE_STATISTICS ON 
 GO
-ALTER DATABASE [Lottery2] SET CURSOR_CLOSE_ON_COMMIT OFF 
+ALTER DATABASE [Lottery] SET CURSOR_CLOSE_ON_COMMIT OFF 
 GO
-ALTER DATABASE [Lottery2] SET CURSOR_DEFAULT  GLOBAL 
+ALTER DATABASE [Lottery] SET CURSOR_DEFAULT  GLOBAL 
 GO
-ALTER DATABASE [Lottery2] SET CONCAT_NULL_YIELDS_NULL OFF 
+ALTER DATABASE [Lottery] SET CONCAT_NULL_YIELDS_NULL OFF 
 GO
-ALTER DATABASE [Lottery2] SET NUMERIC_ROUNDABORT OFF 
+ALTER DATABASE [Lottery] SET NUMERIC_ROUNDABORT OFF 
 GO
-ALTER DATABASE [Lottery2] SET QUOTED_IDENTIFIER OFF 
+ALTER DATABASE [Lottery] SET QUOTED_IDENTIFIER OFF 
 GO
-ALTER DATABASE [Lottery2] SET RECURSIVE_TRIGGERS OFF 
+ALTER DATABASE [Lottery] SET RECURSIVE_TRIGGERS OFF 
 GO
-ALTER DATABASE [Lottery2] SET  ENABLE_BROKER 
+ALTER DATABASE [Lottery] SET  ENABLE_BROKER 
 GO
-ALTER DATABASE [Lottery2] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+ALTER DATABASE [Lottery] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
 GO
-ALTER DATABASE [Lottery2] SET DATE_CORRELATION_OPTIMIZATION OFF 
+ALTER DATABASE [Lottery] SET DATE_CORRELATION_OPTIMIZATION OFF 
 GO
-ALTER DATABASE [Lottery2] SET TRUSTWORTHY OFF 
+ALTER DATABASE [Lottery] SET TRUSTWORTHY OFF 
 GO
-ALTER DATABASE [Lottery2] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+ALTER DATABASE [Lottery] SET ALLOW_SNAPSHOT_ISOLATION OFF 
 GO
-ALTER DATABASE [Lottery2] SET PARAMETERIZATION SIMPLE 
+ALTER DATABASE [Lottery] SET PARAMETERIZATION SIMPLE 
 GO
-ALTER DATABASE [Lottery2] SET READ_COMMITTED_SNAPSHOT OFF 
+ALTER DATABASE [Lottery] SET READ_COMMITTED_SNAPSHOT OFF 
 GO
-ALTER DATABASE [Lottery2] SET HONOR_BROKER_PRIORITY OFF 
+ALTER DATABASE [Lottery] SET HONOR_BROKER_PRIORITY OFF 
 GO
-ALTER DATABASE [Lottery2] SET RECOVERY FULL 
+ALTER DATABASE [Lottery] SET RECOVERY FULL 
 GO
-ALTER DATABASE [Lottery2] SET  MULTI_USER 
+ALTER DATABASE [Lottery] SET  MULTI_USER 
 GO
-ALTER DATABASE [Lottery2] SET PAGE_VERIFY CHECKSUM  
+ALTER DATABASE [Lottery] SET PAGE_VERIFY CHECKSUM  
 GO
-ALTER DATABASE [Lottery2] SET DB_CHAINING OFF 
+ALTER DATABASE [Lottery] SET DB_CHAINING OFF 
 GO
-ALTER DATABASE [Lottery2] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+ALTER DATABASE [Lottery] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
 GO
-ALTER DATABASE [Lottery2] SET TARGET_RECOVERY_TIME = 0 SECONDS 
+ALTER DATABASE [Lottery] SET TARGET_RECOVERY_TIME = 0 SECONDS 
 GO
-ALTER DATABASE [Lottery2] SET DELAYED_DURABILITY = DISABLED 
+ALTER DATABASE [Lottery] SET DELAYED_DURABILITY = DISABLED 
 GO
-EXEC sys.sp_db_vardecimal_storage_format N'Lottery2', N'ON'
+EXEC sys.sp_db_vardecimal_storage_format N'Lottery', N'ON'
 GO
-USE [Lottery2]
+USE [Lottery]
 GO
-/****** Object:  Table [dbo].[AllTable]    Script Date: 02/08/2025 00:47:39 ******/
+/****** Object:  Schema [BI]    Script Date: 02/08/2025 01:12:44 ******/
+CREATE SCHEMA [BI]
+GO
+/****** Object:  UserDefinedFunction [dbo].[CalculateNextNumberProbability]    Script Date: 02/08/2025 01:12:44 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[AllTable](
-	[Run] [int] NULL,
-	[num] [int] NULL,
-	[occurrence] [int] NULL,
-	[lt] [int] NULL
+ CREATE FUNCTION [dbo].[CalculateNextNumberProbability](@current_id INT)
+RETURNS FLOAT
+AS
+BEGIN
+    DECLARE @max_id INT, @total_records INT;
+    SELECT @max_id = MAX(id), @total_records = COUNT(*) FROM euroJackPotArchive;
+
+    -- Calculate the probability (assuming uniform distribution)
+    DECLARE @probability FLOAT;
+    SET @probability = 1.0 / (@max_id - @current_id + 1);
+
+    RETURN @probability;
+END;
+GO
+/****** Object:  Table [BI].[Addresses]    Script Date: 02/08/2025 01:12:44 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [BI].[Addresses](
+	[address_id] [int] IDENTITY(1,1) NOT NULL,
+	[street_name] [nvarchar](100) NOT NULL,
+	[town] [nvarchar](50) NOT NULL,
+	[zip_code] [nvarchar](20) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[address_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[eurocomboarchive]    Script Date: 02/08/2025 00:47:39 ******/
+/****** Object:  Table [BI].[Customers]    Script Date: 02/08/2025 01:12:44 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [BI].[Customers](
+	[cust_id] [int] IDENTITY(1,1) NOT NULL,
+	[first_name] [nvarchar](50) NOT NULL,
+	[last_name] [nvarchar](50) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[cust_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [BI].[Ingredients]    Script Date: 02/08/2025 01:12:44 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [BI].[Ingredients](
+	[ingredient_id] [int] IDENTITY(1,1) NOT NULL,
+	[ingredient_name] [nvarchar](100) NOT NULL,
+	[unit_price] [decimal](10, 2) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ingredient_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [BI].[Inventory]    Script Date: 02/08/2025 01:12:44 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [BI].[Inventory](
+	[inventory_id] [int] IDENTITY(1,1) NOT NULL,
+	[ingredient_id] [int] NOT NULL,
+	[quantity] [decimal](10, 2) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[inventory_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [BI].[Items]    Script Date: 02/08/2025 01:12:44 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [BI].[Items](
+	[item_id] [int] IDENTITY(1,1) NOT NULL,
+	[sku] [nvarchar](50) NOT NULL,
+	[item_name] [nvarchar](100) NOT NULL,
+	[item_category] [nvarchar](50) NOT NULL,
+	[item_size] [nvarchar](50) NOT NULL,
+	[item_price] [decimal](10, 2) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[item_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [BI].[OrderDetails]    Script Date: 02/08/2025 01:12:44 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [BI].[OrderDetails](
+	[order_detail_id] [int] IDENTITY(1,1) NOT NULL,
+	[order_id] [int] NOT NULL,
+	[item_id] [int] NOT NULL,
+	[quantity] [int] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[order_detail_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [BI].[Orders]    Script Date: 02/08/2025 01:12:44 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [BI].[Orders](
+	[order_id] [int] IDENTITY(1,1) NOT NULL,
+	[order_date] [datetime] NOT NULL,
+	[cust_id] [int] NOT NULL,
+	[address_id] [int] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[order_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [BI].[Recipes]    Script Date: 02/08/2025 01:12:44 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [BI].[Recipes](
+	[recipe_id] [int] NOT NULL,
+	[ingredient_id] [int] NOT NULL,
+	[quantity] [decimal](10, 2) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[recipe_id] ASC,
+	[ingredient_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [BI].[Rota]    Script Date: 02/08/2025 01:12:44 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [BI].[Rota](
+	[rota_id] [int] IDENTITY(1,1) NOT NULL,
+	[shift_id] [int] NOT NULL,
+	[date] [date] NOT NULL,
+	[staff_id] [int] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[rota_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [BI].[Shifts]    Script Date: 02/08/2025 01:12:44 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [BI].[Shifts](
+	[shift_id] [int] IDENTITY(1,1) NOT NULL,
+	[day_of_week] [nvarchar](20) NOT NULL,
+	[start_time] [time](7) NOT NULL,
+	[end_time] [time](7) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[shift_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [BI].[Staff]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [BI].[Staff](
+	[staff_id] [int] IDENTITY(1,1) NOT NULL,
+	[first_name] [nvarchar](50) NOT NULL,
+	[last_name] [nvarchar](50) NOT NULL,
+	[position] [nvarchar](50) NOT NULL,
+	[hourly_rate] [decimal](10, 2) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[staff_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Customers]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Customers](
+	[CustomerID] [int] NOT NULL,
+	[CustomerName] [nvarchar](100) NULL,
+	[Email] [nvarchar](100) NULL,
+	[Address] [nvarchar](200) NULL,
+	[Region] [nvarchar](100) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[CustomerID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Dim_Customers]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Dim_Customers](
+	[SurrogateKey] [int] IDENTITY(1,1) NOT NULL,
+	[CustomerID] [int] NULL,
+	[CustomerName] [nvarchar](100) NULL,
+	[Email] [nvarchar](100) NULL,
+	[Address] [nvarchar](200) NULL,
+	[Region] [nvarchar](100) NULL,
+	[StartDate] [date] NULL,
+	[EndDate] [date] NULL,
+	[IsCurrent] [bit] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[SurrogateKey] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Dim_Date]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Dim_Date](
+	[DateKey] [int] NOT NULL,
+	[Date] [date] NULL,
+	[Year] [int] NULL,
+	[Quarter] [int] NULL,
+	[Month] [int] NULL,
+	[Day] [int] NULL,
+	[Week] [int] NULL,
+	[DayOfWeek] [int] NULL,
+	[IsWeekend] [bit] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[DateKey] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Dim_Products]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Dim_Products](
+	[SurrogateKey] [int] IDENTITY(1,1) NOT NULL,
+	[ProductID] [int] NULL,
+	[ProductName] [nvarchar](100) NULL,
+	[Category] [nvarchar](100) NULL,
+	[Price] [decimal](10, 2) NULL,
+	[ProductDescription] [nvarchar](255) NULL,
+	[StartDate] [date] NULL,
+	[EndDate] [date] NULL,
+	[IsCurrent] [bit] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[SurrogateKey] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Dim_Region]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Dim_Region](
+	[RegionKey] [int] IDENTITY(1,1) NOT NULL,
+	[Region] [nvarchar](100) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[RegionKey] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[eurocomboarchive]    Script Date: 02/08/2025 01:12:45 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -103,7 +398,7 @@ CREATE TABLE [dbo].[eurocomboarchive](
 ) ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[euroJackPotArchive]    Script Date: 02/08/2025 00:47:39 ******/
+/****** Object:  Table [dbo].[euroJackPotArchive]    Script Date: 02/08/2025 01:12:45 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -121,7 +416,70 @@ CREATE TABLE [dbo].[euroJackPotArchive](
 ) ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[generateEuroJackpotIntermediate]    Script Date: 02/08/2025 00:47:39 ******/
+/****** Object:  Table [dbo].[finalResults]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[finalResults](
+	[Iteration] [int] NULL,
+	[Num1] [int] NULL,
+	[Num2] [int] NULL,
+	[Num3] [int] NULL,
+	[Num4] [int] NULL,
+	[Num5] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[FinalSequences]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[FinalSequences](
+	[num1] [int] NULL,
+	[num2] [int] NULL,
+	[num3] [int] NULL,
+	[num4] [int] NULL,
+	[num5] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[generateEuroJackpot]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[generateEuroJackpot](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[num1] [int] NULL,
+	[num2] [int] NULL,
+	[num3] [int] NULL,
+	[num4] [int] NULL,
+	[num5] [int] NULL,
+	[star1] [int] NULL,
+	[star2] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[generateEuroJackpotBkp]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[generateEuroJackpotBkp](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[num1] [int] NULL,
+	[num2] [int] NULL,
+	[num3] [int] NULL,
+	[num4] [int] NULL,
+	[num5] [int] NULL,
+	[star1] [int] NULL,
+	[star2] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[generateEuroJackpotIntermediate]    Script Date: 02/08/2025 01:12:45 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -166,7 +524,18 @@ CREATE TABLE [dbo].[generateEuroJackpotIntermediate](
 ) ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[new_probabilityResult]    Script Date: 02/08/2025 00:47:39 ******/
+/****** Object:  Table [dbo].[hits]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[hits](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[position] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[new_probabilityResult]    Script Date: 02/08/2025 01:12:45 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -174,11 +543,43 @@ GO
 CREATE TABLE [dbo].[new_probabilityResult](
 	[num] [int] NULL,
 	[occurrence] [int] NULL,
-	[probability] [decimal](18, 10) NULL
+	[probability] [decimal](10, 5) NULL
 ) ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[probability]    Script Date: 02/08/2025 00:47:39 ******/
+/****** Object:  Table [dbo].[new_probabilityResult2]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[new_probabilityResult2](
+	[num] [int] NULL,
+	[occurrence] [int] NULL,
+	[probability] [float] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[pastPatterns]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[pastPatterns](
+	[id] [int] NULL,
+	[col1] [int] NULL,
+	[col2] [int] NULL,
+	[col3] [int] NULL,
+	[col4] [int] NULL,
+	[col5] [int] NULL,
+	[Msg] [varchar](150) NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[probability]    Script Date: 02/08/2025 01:12:45 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -189,7 +590,7 @@ CREATE TABLE [dbo].[probability](
 ) ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[ProbabilityResults]    Script Date: 02/08/2025 00:47:39 ******/
+/****** Object:  Table [dbo].[ProbabilityResults]    Script Date: 02/08/2025 01:12:45 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -210,7 +611,7 @@ CREATE TABLE [dbo].[ProbabilityResults](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[ProbHistory]    Script Date: 02/08/2025 00:47:39 ******/
+/****** Object:  Table [dbo].[ProbHistory]    Script Date: 02/08/2025 01:12:45 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -231,7 +632,85 @@ CREATE TABLE [dbo].[ProbHistory](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[stageOne_1]    Script Date: 02/08/2025 00:47:39 ******/
+/****** Object:  Table [dbo].[Products]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Products](
+	[ProductID] [int] NOT NULL,
+	[ProductName] [nvarchar](100) NULL,
+	[Category] [nvarchar](100) NULL,
+	[Price] [decimal](10, 2) NULL,
+	[ProductDescription] [nvarchar](255) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ProductID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[RandomNumbers]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[RandomNumbers](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[Number1] [int] NULL,
+	[Number2] [int] NULL,
+	[Number3] [int] NULL,
+	[Number4] [int] NULL,
+	[Number5] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Sales]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Sales](
+	[SaleID] [int] NOT NULL,
+	[CustomerID] [int] NULL,
+	[ProductID] [int] NULL,
+	[SaleDate] [date] NULL,
+	[Quantity] [int] NULL,
+	[Amount] [decimal](10, 2) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[SaleID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Sequences]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Sequences](
+	[num1] [int] NULL,
+	[num2] [int] NULL,
+	[num3] [int] NULL,
+	[num4] [int] NULL,
+	[num5] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[SourceTable]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[SourceTable](
+	[Registered_Customer_Id_Upper] [nvarchar](255) NOT NULL,
+	[File_Group] [int] NULL,
+	[Is_Sent] [bit] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[stageOne_1]    Script Date: 02/08/2025 01:12:45 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -242,7 +721,7 @@ CREATE TABLE [dbo].[stageOne_1](
 ) ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[stageOne_2]    Script Date: 02/08/2025 00:47:39 ******/
+/****** Object:  Table [dbo].[stageOne_2]    Script Date: 02/08/2025 01:12:45 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -253,7 +732,7 @@ CREATE TABLE [dbo].[stageOne_2](
 ) ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[stageOne_3]    Script Date: 02/08/2025 00:47:39 ******/
+/****** Object:  Table [dbo].[stageOne_3]    Script Date: 02/08/2025 01:12:45 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -264,7 +743,7 @@ CREATE TABLE [dbo].[stageOne_3](
 ) ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[stageOne_4]    Script Date: 02/08/2025 00:47:40 ******/
+/****** Object:  Table [dbo].[stageOne_4]    Script Date: 02/08/2025 01:12:45 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -275,7 +754,7 @@ CREATE TABLE [dbo].[stageOne_4](
 ) ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[stageOne_5]    Script Date: 02/08/2025 00:47:40 ******/
+/****** Object:  Table [dbo].[stageOne_5]    Script Date: 02/08/2025 01:12:45 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -286,7 +765,496 @@ CREATE TABLE [dbo].[stageOne_5](
 ) ON [PRIMARY]
 
 GO
+/****** Object:  Table [dbo].[Staging_Customers]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Staging_Customers](
+	[CustomerID] [int] NULL,
+	[CustomerName] [nvarchar](100) NULL,
+	[Email] [nvarchar](100) NULL,
+	[Address] [nvarchar](200) NULL,
+	[Region] [nvarchar](100) NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Staging_Inventory]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Staging_Inventory](
+	[ProductID] [int] NULL,
+	[ProductName] [nvarchar](100) NULL,
+	[Category] [nvarchar](100) NULL,
+	[Price] [decimal](10, 2) NULL,
+	[ProductDescription] [nvarchar](255) NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Staging_Sales]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Staging_Sales](
+	[SaleID] [int] NULL,
+	[CustomerID] [int] NULL,
+	[ProductID] [int] NULL,
+	[SaleDate] [date] NULL,
+	[Quantity] [int] NULL,
+	[Amount] [decimal](10, 2) NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[tab_sequence1]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tab_sequence1](
+	[col1] [int] NULL,
+	[col2] [int] NULL,
+	[col3] [int] NULL,
+	[col4] [int] NULL,
+	[col5] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[testColumns]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[testColumns](
+	[id] [int] NULL,
+	[num1] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[ukLottoArchive]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ukLottoArchive](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[draw_date] [date] NOT NULL,
+	[num1] [int] NOT NULL,
+	[num2] [int] NOT NULL,
+	[num3] [int] NOT NULL,
+	[num4] [int] NOT NULL,
+	[num5] [int] NOT NULL,
+	[num6] [int] NOT NULL,
+	[bonus] [int] NOT NULL
+) ON [PRIMARY]
+
+GO
+ALTER TABLE [BI].[Orders] ADD  DEFAULT (getdate()) FOR [order_date]
+GO
+ALTER TABLE [BI].[Inventory]  WITH CHECK ADD FOREIGN KEY([ingredient_id])
+REFERENCES [BI].[Ingredients] ([ingredient_id])
+GO
+ALTER TABLE [BI].[OrderDetails]  WITH CHECK ADD FOREIGN KEY([item_id])
+REFERENCES [BI].[Items] ([item_id])
+GO
+ALTER TABLE [BI].[OrderDetails]  WITH CHECK ADD FOREIGN KEY([order_id])
+REFERENCES [BI].[Orders] ([order_id])
+GO
+ALTER TABLE [BI].[Orders]  WITH CHECK ADD FOREIGN KEY([address_id])
+REFERENCES [BI].[Addresses] ([address_id])
+GO
+ALTER TABLE [BI].[Orders]  WITH CHECK ADD FOREIGN KEY([cust_id])
+REFERENCES [BI].[Customers] ([cust_id])
+GO
+ALTER TABLE [BI].[Recipes]  WITH CHECK ADD FOREIGN KEY([ingredient_id])
+REFERENCES [BI].[Ingredients] ([ingredient_id])
+GO
+ALTER TABLE [BI].[Recipes]  WITH CHECK ADD FOREIGN KEY([recipe_id])
+REFERENCES [BI].[Items] ([item_id])
+GO
+ALTER TABLE [BI].[Rota]  WITH CHECK ADD FOREIGN KEY([shift_id])
+REFERENCES [BI].[Shifts] ([shift_id])
+GO
+ALTER TABLE [BI].[Rota]  WITH CHECK ADD FOREIGN KEY([staff_id])
+REFERENCES [BI].[Staff] ([staff_id])
+GO
+/****** Object:  StoredProcedure [dbo].[CalculateAppearanceWeight]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Create a stored procedure to calculate the appearance weight for each combination
+CREATE PROCEDURE [dbo].[CalculateAppearanceWeight]
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @currentMaxId INT;
+    SELECT @currentMaxId = MAX(id) FROM [dbo].[euroJackPotArchive];
+
+    -- Calculate the appearance weight for each combination
+    SELECT 
+        num1, num2, num3, num4, num5,
+        COUNT(*) AS Frequency,
+        (
+            (SELECT ISNULL(@currentMaxId - MAX(id), @currentMaxId) FROM [dbo].[euroJackPotArchive] WHERE num1 = a.num1) +
+            (SELECT ISNULL(@currentMaxId - MAX(id), @currentMaxId) FROM [dbo].[euroJackPotArchive] WHERE num2 = a.num2) +
+            (SELECT ISNULL(@currentMaxId - MAX(id), @currentMaxId) FROM [dbo].[euroJackPotArchive] WHERE num3 = a.num3) +
+            (SELECT ISNULL(@currentMaxId - MAX(id), @currentMaxId) FROM [dbo].[euroJackPotArchive] WHERE num4 = a.num4) +
+            (SELECT ISNULL(@currentMaxId - MAX(id), @currentMaxId) FROM [dbo].[euroJackPotArchive] WHERE num5 = a.num5)
+        ) / 5.0 AS RecencyWeight,
+        (
+            COUNT(*) * (
+                (SELECT ISNULL(@currentMaxId - MAX(id), @currentMaxId) FROM [dbo].[euroJackPotArchive] WHERE num1 = a.num1) +
+                (SELECT ISNULL(@currentMaxId - MAX(id), @currentMaxId) FROM [dbo].[euroJackPotArchive] WHERE num2 = a.num2) +
+                (SELECT ISNULL(@currentMaxId - MAX(id), @currentMaxId) FROM [dbo].[euroJackPotArchive] WHERE num3 = a.num3) +
+                (SELECT ISNULL(@currentMaxId - MAX(id), @currentMaxId) FROM [dbo].[euroJackPotArchive] WHERE num4 = a.num4) +
+                (SELECT ISNULL(@currentMaxId - MAX(id), @currentMaxId) FROM [dbo].[euroJackPotArchive] WHERE num5 = a.num5)
+            ) / 5.0
+        ) AS AppearanceWeight
+    FROM 
+        [dbo].[euroJackPotArchive] a
+    GROUP BY 
+        num1, num2, num3, num4, num5
+    HAVING 
+        COUNT(*) = 0 -- Ensure the combination has not appeared before
+    ORDER BY 
+        AppearanceWeight DESC;
+END;
+
+GO
+/****** Object:  StoredProcedure [dbo].[CalculateCombinationScore]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Create a stored procedure to calculate the score for a given combination
+CREATE PROCEDURE [dbo].[CalculateCombinationScore]
+    @num1 INT,
+    @num2 INT,
+    @num3 INT,
+    @num4 INT,
+    @num5 INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @currentMaxId INT;
+    SELECT @currentMaxId = MAX(id) FROM [dbo].[euroJackPotArchive];
+
+    -- Calculate the frequency and recency for each number
+    WITH NumberStats AS (
+        SELECT 
+            num,
+            COUNT(*) AS Frequency,
+            ISNULL(@currentMaxId - MAX(id), @currentMaxId) AS Recency
+        FROM (
+            SELECT num1 AS num, id FROM [dbo].[euroJackPotArchive]
+            UNION ALL
+            SELECT num2 AS num, id FROM [dbo].[euroJackPotArchive]
+            UNION ALL
+            SELECT num3 AS num, id FROM [dbo].[euroJackPotArchive]
+            UNION ALL
+            SELECT num4 AS num, id FROM [dbo].[euroJackPotArchive]
+            UNION ALL
+            SELECT num5 AS num, id FROM [dbo].[euroJackPotArchive]
+        ) AS AllNumbers
+        GROUP BY num
+    )
+
+    -- Calculate the score for the given combination
+    SELECT 
+        @num1 AS num1, 
+        @num2 AS num2, 
+        @num3 AS num3, 
+        @num4 AS num4, 
+        @num5 AS num5,
+        (n1.Frequency + n2.Frequency + n3.Frequency + n4.Frequency + n5.Frequency) / 5.0 AS AvgFrequency,
+        (n1.Recency + n2.Recency + n3.Recency + n4.Recency + n5.Recency) / 5.0 AS AvgRecency,
+        ((n1.Frequency + n2.Frequency + n3.Frequency + n4.Frequency + n5.Frequency) / 5.0) * 
+        ((n1.Recency + n2.Recency + n3.Recency + n4.Recency + n5.Recency) / 5.0) AS Score
+    FROM 
+        NumberStats n1, 
+        NumberStats n2, 
+        NumberStats n3, 
+        NumberStats n4, 
+        NumberStats n5
+    WHERE 
+        n1.num = @num1 AND 
+        n2.num = @num2 AND 
+        n3.num = @num3 AND 
+        n4.num = @num4 AND 
+        n5.num = @num5;
+END;
+
+GO
+/****** Object:  StoredProcedure [dbo].[CalculateCombinationScores]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Create a stored procedure to calculate the score for each combination in generateEuroJackpotBkp
+CREATE PROCEDURE [dbo].[CalculateCombinationScores]
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @currentMaxId INT;
+    SELECT @currentMaxId = MAX(id) FROM [dbo].[euroJackPotArchive];
+
+    -- Calculate the frequency and recency for each number
+    WITH NumberStats AS (
+        SELECT 
+            num,
+            COUNT(*) AS Frequency,
+            ISNULL(@currentMaxId - MAX(id), @currentMaxId) AS Recency
+        FROM (
+            SELECT num1 AS num, id FROM [dbo].[euroJackPotArchive]
+            UNION ALL
+            SELECT num2 AS num, id FROM [dbo].[euroJackPotArchive]
+            UNION ALL
+            SELECT num3 AS num, id FROM [dbo].[euroJackPotArchive]
+            UNION ALL
+            SELECT num4 AS num, id FROM [dbo].[euroJackPotArchive]
+            UNION ALL
+            SELECT num5 AS num, id FROM [dbo].[euroJackPotArchive]
+        ) AS AllNumbers
+        GROUP BY num
+    )
+
+    -- Calculate the score for each combination in generateEuroJackpotBkp
+    SELECT 
+        g.id,
+        g.num1, 
+        g.num2, 
+        g.num3, 
+        g.num4, 
+        g.num5,
+        (n1.Frequency + n2.Frequency + n3.Frequency + n4.Frequency + n5.Frequency) / 5.0 AS AvgFrequency,
+        (n1.Recency + n2.Recency + n3.Recency + n4.Recency + n5.Recency) / 5.0 AS AvgRecency,
+        ((n1.Frequency + n2.Frequency + n3.Frequency + n4.Frequency + n5.Frequency) / 5.0) * 
+        ((n1.Recency + n2.Recency + n3.Recency + n4.Recency + n5.Recency) / 5.0) AS Score
+    FROM 
+        [dbo].[generateEuroJackpotBkp] g
+    JOIN 
+        NumberStats n1 ON g.num1 = n1.num
+    JOIN 
+        NumberStats n2 ON g.num2 = n2.num
+    JOIN 
+        NumberStats n3 ON g.num3 = n3.num
+    JOIN 
+        NumberStats n4 ON g.num4 = n4.num
+    JOIN 
+        NumberStats n5 ON g.num5 = n5.num
+    WHERE 
+        ((n1.Frequency + n2.Frequency + n3.Frequency + n4.Frequency + n5.Frequency) / 5.0) * 
+        ((n1.Recency + n2.Recency + n3.Recency + n4.Recency + n5.Recency) / 5.0) BETWEEN 300 AND 450
+  
+    and num1=10 
+	and num2=19
+	and num3=24
+	and num4=25
+	--and num5=40
+    ORDER BY 
+        Score DESC;
+END;
+
+GO
+/****** Object:  StoredProcedure [dbo].[CalculateProbability]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+--/****** Object:  Table [dbo].[euroJackPotArchive]    Script Date: 01/01/2025 17:03:29 ******/
+--SET ANSI_NULLS ON;
+--GO
+
+--SET QUOTED_IDENTIFIER ON;
+--GO
+
+--CREATE TABLE IF NOT EXISTS [dbo].[euroJackPotArchive](
+--    [id] [int] IDENTITY(1,1) NOT NULL,
+--    [datum] [date] NULL,
+--    [num1] [int] NULL,
+--    [num2] [int] NULL,
+--    [num3] [int] NULL,
+--    [num4] [int] NULL,
+--    [num5] [int] NULL,
+--    [star1] [int] NULL,
+--    [start2] [int] NULL,
+--    PRIMARY KEY ([id])
+--) ON [PRIMARY];
+--GO
+
+---- Insert past draw data into the table (example data)
+--INSERT INTO [dbo].[euroJackPotArchive] ([datum], [num1], [num2], [num3], [num4], [num5], [star1], [start2])
+--VALUES 
+--('2024-09-13', 2, 3, 17, 40, 44, 4, 8),
+--('2024-09-17', 1, 3, 13, 24, 44, 11, 12),
+--('2024-09-20', 9, 17, 19, 26, 39, 4, 10),
+--('2024-09-23', 3, 13, 34, 41, 43, 1, 5);
+---- Add more historical data as needed
+
+---- Create a stored procedure to calculate the probability of the entered numbers
+--DROP  PROCEDURE dbo.CalculateProbability; 
+CREATE PROCEDURE [dbo].[CalculateProbability]
+    @num1 INT,
+    @num2 INT,
+    @num3 INT,
+    @num4 INT,
+    @num5 INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @totalDraws INT;
+    DECLARE @matchingDraws INT;
+    DECLARE @currentMaxId INT;
+
+    -- Calculate the total number of draws
+    SELECT @totalDraws = COUNT(*) FROM [dbo].[euroJackPotArchive];
+
+    -- Calculate the number of draws that match the entered numbers
+    SELECT @matchingDraws = COUNT(*)
+    FROM [dbo].[euroJackPotArchive]
+    WHERE num1 = @num1 AND num2 = @num2 AND num3 = @num3 AND num4 = @num4 AND num5 = @num5;
+
+    -- Calculate the recency weight for each number
+    SELECT @currentMaxId = MAX(id) FROM [dbo].[euroJackPotArchive];
+
+    DECLARE @recencyWeight FLOAT;
+    SET @recencyWeight = (
+        (SELECT ISNULL(@currentMaxId - MAX(id), @currentMaxId) FROM [dbo].[euroJackPotArchive] WHERE num1 = @num1) +
+        (SELECT ISNULL(@currentMaxId - MAX(id), @currentMaxId) FROM [dbo].[euroJackPotArchive] WHERE num2 = @num2) +
+        (SELECT ISNULL(@currentMaxId - MAX(id), @currentMaxId) FROM [dbo].[euroJackPotArchive] WHERE num3 = @num3) +
+        (SELECT ISNULL(@currentMaxId - MAX(id), @currentMaxId) FROM [dbo].[euroJackPotArchive] WHERE num4 = @num4) +
+        (SELECT ISNULL(@currentMaxId - MAX(id), @currentMaxId) FROM [dbo].[euroJackPotArchive] WHERE num5 = @num5)
+    ) / 5.0;
+
+    -- Calculate the appearance weight for each number
+    DECLARE @appearanceWeight FLOAT;
+    SET @appearanceWeight = (
+        (SELECT COUNT(*) FROM [dbo].[euroJackPotArchive] WHERE num1 = @num1) +
+        (SELECT COUNT(*) FROM [dbo].[euroJackPotArchive] WHERE num2 = @num2) +
+        (SELECT COUNT(*) FROM [dbo].[euroJackPotArchive] WHERE num3 = @num3) +
+        (SELECT COUNT(*) FROM [dbo].[euroJackPotArchive] WHERE num4 = @num4) +
+        (SELECT COUNT(*) FROM [dbo].[euroJackPotArchive] WHERE num5 = @num5)
+    ) / 5.0;
+
+    -- Calculate the probability
+    DECLARE @probability FLOAT;
+    IF @totalDraws > 0
+    BEGIN
+        SET @probability = (CAST(@matchingDraws AS FLOAT) / @totalDraws) * @recencyWeight / @appearanceWeight;
+    END
+    ELSE
+    BEGIN
+        SET @probability = 0;
+    END
+
+    -- Return the probability
+    SELECT @probability AS Probability, @matchingDraws AS MatchingDraws, @totalDraws AS TotalDraws, @recencyWeight AS RecencyWeight, @appearanceWeight AS AppearanceWeight;
+END;
+
+GO
+/****** Object:  StoredProcedure [dbo].[GenerateSequences]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[GenerateSequences] (
+    @num1 INT,
+    @pattern VARCHAR(10),
+    @additional_num INT
+)
+AS
+BEGIN
+    DECLARE @num2 INT, @num3 INT, @num4 INT, @num5 INT;
+    DECLARE @num3_min INT, @num3_max INT, @num4_min INT, @num4_max INT;
+    DECLARE @count INT = 0;
+
+    -- Define the ranges based on the pattern
+    IF @pattern = '10/10' BEGIN SET @num3_min = 10; SET @num3_max = 19; SET @num4_min = 10; SET @num4_max = 19; END
+    ELSE IF @pattern = '10/20' BEGIN SET @num3_min = 10; SET @num3_max = 19; SET @num4_min = 20; SET @num4_max = 29; END
+    ELSE IF @pattern = '10/30' BEGIN SET @num3_min = 10; SET @num3_max = 19; SET @num4_min = 30; SET @num4_max = 39; END
+    ELSE IF @pattern = '10/40' BEGIN SET @num3_min = 10; SET @num3_max = 19; SET @num4_min = 40; SET @num4_max = 49; END
+    ELSE IF @pattern = '20/20' BEGIN SET @num3_min = 20; SET @num3_max = 29; SET @num4_min = 20; SET @num4_max = 29; END
+    ELSE IF @pattern = '20/30' BEGIN SET @num3_min = 20; SET @num3_max = 29; SET @num4_min = 30; SET @num4_max = 39; END
+    ELSE IF @pattern = '20/40' BEGIN SET @num3_min = 20; SET @num3_max = 29; SET @num4_min = 40; SET @num4_max = 49; END
+    ELSE IF @pattern = '30/30' BEGIN SET @num3_min = 30; SET @num3_max = 39; SET @num4_min = 30; SET @num4_max = 39; END
+    ELSE IF @pattern = '30/40' BEGIN SET @num3_min = 30; SET @num3_max = 39; SET @num4_min = 40; SET @num4_max = 49; END
+    ELSE IF @pattern = '40/40' BEGIN SET @num3_min = 40; SET @num3_max = 49; SET @num4_min = 40; SET @num4_max = 49; END
+    ELSE IF @pattern = '05/10' BEGIN SET @num3_min = 0; SET @num3_max = 10; SET @num4_min = 10; SET @num4_max = 20; END
+    ELSE
+        RAISERROR('Invalid pattern', 16, 1);
+
+    -- Generate 100 sequences
+    WHILE @count < 3
+    BEGIN
+        SET @num2 = FLOOR(RAND() * (@num3_min - @num1 - 1)) + @num1 + 1;
+        SET @num3 = FLOOR(RAND() * (@num3_max - @num3_min + 1)) + @num3_min;
+        SET @num4 = FLOOR(RAND() * (@num4_max - @num4_min + 1)) + @num4_min;
+        SET @num5 = FLOOR(RAND() * (50 - @num4)) + @num4 + 1;
+
+        -- Ensure num1 < num2 < num3 < num4 < num5
+        IF @num1 < @num2 AND @num2 < @num3 AND @num3 < @num4 AND @num4 < @num5
+        BEGIN
+            DECLARE @sequence TABLE (num1 INT, num2 INT, num3 INT, num4 INT, num5 INT);
+            INSERT INTO @sequence VALUES (@num1, @num2, @num3, @num4, @num5);
+
+            -- Insert the additional number into num2 to num5
+            DECLARE @insert_pos INT = FLOOR(RAND() * 4) + 2;
+            IF @insert_pos = 2 UPDATE @sequence SET num2 = @additional_num;
+            IF @insert_pos = 3 UPDATE @sequence SET num3 = @additional_num;
+            IF @insert_pos = 4 UPDATE @sequence SET num4 = @additional_num;
+            IF @insert_pos = 5 UPDATE @sequence SET num5 = @additional_num;
+
+            -- Ensure the sequence is still in ascending order
+            IF (SELECT TOP 1 num1 FROM @sequence) < (SELECT TOP 1 num2 FROM @sequence) AND
+               (SELECT TOP 1 num2 FROM @sequence) < (SELECT TOP 1 num3 FROM @sequence) AND
+               (SELECT TOP 1 num3 FROM @sequence) < (SELECT TOP 1 num4 FROM @sequence) AND
+               (SELECT TOP 1 num4 FROM @sequence) < (SELECT TOP 1 num5 FROM @sequence)
+            BEGIN
+                INSERT INTO Sequences
+                SELECT * FROM @sequence;
+                SET @count = @count + 1;
+            END
+        END
+    END
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[GetTopCombinations]    Script Date: 02/08/2025 01:12:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Create a stored procedure to calculate the appearance weight for each combination
+CREATE PROCEDURE [dbo].[GetTopCombinations]
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Calculate the appearance weight for each combination
+    SELECT 
+        num1, num2, num3, num4, num5,
+        COUNT(*) AS AppearanceWeight
+    FROM 
+        [dbo].[euroJackPotArchive]
+    GROUP BY 
+        num1, num2, num3, num4, num5
+    ORDER BY 
+        AppearanceWeight DESC;
+END;
+
+GO
 USE [master]
 GO
-ALTER DATABASE [Lottery2] SET  READ_WRITE 
+ALTER DATABASE [Lottery] SET  READ_WRITE 
 GO
