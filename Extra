@@ -1,0 +1,6 @@
+CREATE TABLE [dbo].[AllTable](
+	[Run] [int] NULL,
+	[num] [int] NULL,
+	[occurrence] [int] NULL,
+	[lt] [int] NULL
+) ON [PRIMARY]
