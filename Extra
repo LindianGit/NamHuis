@@ -153,3 +153,11 @@ CREATE TABLE [dbo].[stageOne_5](
 	[num2] [int] NULL,
 	[couldhappen] [decimal](10, 5) NULL
 ) ON [PRIMARY]
+
+
+CREATE TABLE [dbo].[probability](
+	[num] [int] NULL,
+	[occurrence] [int] NULL
+) ON [PRIMARY]
+
+GO
