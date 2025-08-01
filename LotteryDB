@@ -1,0 +1,292 @@
+USE [master]
+GO
+/****** Object:  Database [Lottery2]    Script Date: 02/08/2025 00:47:39 ******/
+CREATE DATABASE [Lottery2]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'Lottery2', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\Lottery2.mdf' , SIZE = 4288KB , MAXSIZE = UNLIMITED, FILEGROWTH = 1024KB )
+ LOG ON 
+( NAME = N'Lottery2_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL12.MSSQLSERVER\MSSQL\DATA\Lottery2_log.ldf' , SIZE = 1072KB , MAXSIZE = 2048GB , FILEGROWTH = 10%)
+GO
+ALTER DATABASE [Lottery2] SET COMPATIBILITY_LEVEL = 120
+GO
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [Lottery2].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+ALTER DATABASE [Lottery2] SET ANSI_NULL_DEFAULT OFF 
+GO
+ALTER DATABASE [Lottery2] SET ANSI_NULLS OFF 
+GO
+ALTER DATABASE [Lottery2] SET ANSI_PADDING OFF 
+GO
+ALTER DATABASE [Lottery2] SET ANSI_WARNINGS OFF 
+GO
+ALTER DATABASE [Lottery2] SET ARITHABORT OFF 
+GO
+ALTER DATABASE [Lottery2] SET AUTO_CLOSE OFF 
+GO
+ALTER DATABASE [Lottery2] SET AUTO_SHRINK OFF 
+GO
+ALTER DATABASE [Lottery2] SET AUTO_UPDATE_STATISTICS ON 
+GO
+ALTER DATABASE [Lottery2] SET CURSOR_CLOSE_ON_COMMIT OFF 
+GO
+ALTER DATABASE [Lottery2] SET CURSOR_DEFAULT  GLOBAL 
+GO
+ALTER DATABASE [Lottery2] SET CONCAT_NULL_YIELDS_NULL OFF 
+GO
+ALTER DATABASE [Lottery2] SET NUMERIC_ROUNDABORT OFF 
+GO
+ALTER DATABASE [Lottery2] SET QUOTED_IDENTIFIER OFF 
+GO
+ALTER DATABASE [Lottery2] SET RECURSIVE_TRIGGERS OFF 
+GO
+ALTER DATABASE [Lottery2] SET  ENABLE_BROKER 
+GO
+ALTER DATABASE [Lottery2] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+GO
+ALTER DATABASE [Lottery2] SET DATE_CORRELATION_OPTIMIZATION OFF 
+GO
+ALTER DATABASE [Lottery2] SET TRUSTWORTHY OFF 
+GO
+ALTER DATABASE [Lottery2] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+GO
+ALTER DATABASE [Lottery2] SET PARAMETERIZATION SIMPLE 
+GO
+ALTER DATABASE [Lottery2] SET READ_COMMITTED_SNAPSHOT OFF 
+GO
+ALTER DATABASE [Lottery2] SET HONOR_BROKER_PRIORITY OFF 
+GO
+ALTER DATABASE [Lottery2] SET RECOVERY FULL 
+GO
+ALTER DATABASE [Lottery2] SET  MULTI_USER 
+GO
+ALTER DATABASE [Lottery2] SET PAGE_VERIFY CHECKSUM  
+GO
+ALTER DATABASE [Lottery2] SET DB_CHAINING OFF 
+GO
+ALTER DATABASE [Lottery2] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+GO
+ALTER DATABASE [Lottery2] SET TARGET_RECOVERY_TIME = 0 SECONDS 
+GO
+ALTER DATABASE [Lottery2] SET DELAYED_DURABILITY = DISABLED 
+GO
+EXEC sys.sp_db_vardecimal_storage_format N'Lottery2', N'ON'
+GO
+USE [Lottery2]
+GO
+/****** Object:  Table [dbo].[AllTable]    Script Date: 02/08/2025 00:47:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[AllTable](
+	[Run] [int] NULL,
+	[num] [int] NULL,
+	[occurrence] [int] NULL,
+	[lt] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[eurocomboarchive]    Script Date: 02/08/2025 00:47:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[eurocomboarchive](
+	[pk] [int] IDENTITY(1,1) NOT NULL,
+	[id] [int] NULL,
+	[num1] [int] NULL,
+	[ref] [nvarchar](10) NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[euroJackPotArchive]    Script Date: 02/08/2025 00:47:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[euroJackPotArchive](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[datum] [date] NULL,
+	[num1] [int] NULL,
+	[num2] [int] NULL,
+	[num3] [int] NULL,
+	[num4] [int] NULL,
+	[num5] [int] NULL,
+	[star1] [int] NULL,
+	[start2] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[generateEuroJackpotIntermediate]    Script Date: 02/08/2025 00:47:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[generateEuroJackpotIntermediate](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[num1] [int] NULL,
+	[num2] [int] NULL,
+	[num3] [int] NULL,
+	[num4] [int] NULL,
+	[num5] [int] NULL,
+	[c1] [int] NULL,
+	[c2] [int] NULL,
+	[c3] [int] NULL,
+	[c4] [int] NULL,
+	[c5] [int] NULL,
+	[c6] [int] NULL,
+	[c7] [int] NULL,
+	[c8] [int] NULL,
+	[c9] [int] NULL,
+	[c10] [int] NULL,
+	[c11] [int] NULL,
+	[c12] [int] NULL,
+	[c13] [int] NULL,
+	[c14] [int] NULL,
+	[c15] [int] NULL,
+	[c16] [int] NULL,
+	[c17] [int] NULL,
+	[c18] [int] NULL,
+	[c19] [int] NULL,
+	[c20] [int] NULL,
+	[c21] [int] NULL,
+	[c22] [int] NULL,
+	[c23] [int] NULL,
+	[c24] [int] NULL,
+	[c25] [int] NULL,
+	[star1] [int] NULL,
+	[star2] [int] NULL,
+	[p2] [int] NULL,
+	[p3] [int] NULL,
+	[p4] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[new_probabilityResult]    Script Date: 02/08/2025 00:47:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[new_probabilityResult](
+	[num] [int] NULL,
+	[occurrence] [int] NULL,
+	[probability] [decimal](18, 10) NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[probability]    Script Date: 02/08/2025 00:47:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[probability](
+	[num] [int] NULL,
+	[occurrence] [int] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[ProbabilityResults]    Script Date: 02/08/2025 00:47:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ProbabilityResults](
+	[stem] [char](4) NOT NULL,
+	[num] [int] NOT NULL,
+	[occurrence] [int] NOT NULL,
+	[probability] [decimal](10, 10) NOT NULL,
+	[lt] [int] NOT NULL,
+	[couldHappen] [decimal](18, 10) NOT NULL,
+	[NTileGroup] [int] NOT NULL,
+	[ID] [int] NOT NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[ProbHistory]    Script Date: 02/08/2025 00:47:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ProbHistory](
+	[stem] [char](4) NOT NULL,
+	[num] [int] NOT NULL,
+	[occurrence] [int] NOT NULL,
+	[probability] [decimal](10, 10) NOT NULL,
+	[lt] [int] NOT NULL,
+	[couldHappen] [decimal](18, 10) NULL,
+	[NTileGroup] [int] NOT NULL,
+	[ID] [int] NOT NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[stageOne_1]    Script Date: 02/08/2025 00:47:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[stageOne_1](
+	[num1] [int] NULL,
+	[couldhappen] [decimal](10, 5) NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[stageOne_2]    Script Date: 02/08/2025 00:47:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[stageOne_2](
+	[num2] [int] NULL,
+	[couldhappen] [decimal](10, 5) NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[stageOne_3]    Script Date: 02/08/2025 00:47:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[stageOne_3](
+	[num3] [int] NULL,
+	[couldhappen] [decimal](10, 5) NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[stageOne_4]    Script Date: 02/08/2025 00:47:40 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[stageOne_4](
+	[num4] [int] NULL,
+	[couldhappen] [decimal](10, 5) NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[stageOne_5]    Script Date: 02/08/2025 00:47:40 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[stageOne_5](
+	[num5] [int] NULL,
+	[couldhappen] [decimal](10, 5) NULL
+) ON [PRIMARY]
+
+GO
+USE [master]
+GO
+ALTER DATABASE [Lottery2] SET  READ_WRITE 
+GO
