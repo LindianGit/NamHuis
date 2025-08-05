@@ -1,0 +1,263 @@
+```bash name=service_user_command.sh
+# ========================================
+# Command for Service User (no Snowflake access required)
+# ========================================
+
+# 1. Upload your data file AND the config file to the SFTP server
+#    (Suppose your data file is myfile.csv and config file is dcr_config_20250805_001.yaml)
+# 2. Then run this command (from your terminal or as a scheduled job):
+
+sftp user@your-sftp-server <<EOF
+put myfile.csv /dropzone/
+put dcr_config_20250805_001.yaml /dropzone/
+EOF
+
+# That's it! The automation/orchestrator will pick up both files and handle everything else.
+```
+
+```yaml name=dcr_config_20250805_001.yaml
+# Place this config file on the SFTP server with your data file
+run_id: "20250805_001"
+provider_db: "samsungdb"
+provider_schema: "samsung_schema"
+stage_name: "my_stage"
+file_name: "myfile.csv"
+file_format: "my_csv_format"
+table_name: "Stage_Table_20250805_001"
+cleanroom_name: "SAMSUNG_ARGOS_20250805_001"
+template_name: "overlap_template_20250805_001"
+consumer_account: "TA76655"
+consumer_role: "SFPSCOGS.AM_DCR_CONSUMER"
+join_columns:
+  - "hashedEmails"
+  - "device_id"
+  - "user_id"
+  - "phone_number"
+  - "custom_col"
+```
+
+```python name=automation_load_config.py
+# ========================================
+# Example: Automation/orchestrator script for loading config from SFTP
+# ========================================
+# 1. Downloads the config YAML file from SFTP to local disk or memory.
+# 2. Parses YAML and sets variables for Snowflake script execution.
+# 3. Passes variables to the parameterized Snowflake script (via snowsql or Snowflake Python connector).
+
+import yaml
+import paramiko
+
+SFTP_HOST = "your-sftp-server"
+SFTP_USER = "user"
+SFTP_PASSWORD = "password"
+CONFIG_FILE = "dcr_config_20250805_001.yaml"
+REMOTE_PATH = f"/dropzone/{CONFIG_FILE}"
+
+# Step 1: Download config file from SFTP
+with paramiko.Transport((SFTP_HOST, 22)) as transport:
+    transport.connect(username=SFTP_USER, password=SFTP_PASSWORD)
+    sftp = paramiko.SFTPClient.from_transport(transport)
+    sftp.get(REMOTE_PATH, CONFIG_FILE)
+    sftp.close()
+
+# Step 2: Load YAML config
+with open(CONFIG_FILE) as f:
+    config = yaml.safe_load(f)
+
+# Now, `config` is a dict with all variables for the Snowflake script
+# Pass these as SQL variables or substitute into your script template (see next file)
+```
+
+```sql name=parameterized_dcr_workflow.sql
+-- ========================================
+-- Parameterized DCR Setup Script (Config-Driven, Multi-Column Join, SFTP Source)
+-- ========================================
+-- This script assumes all variables are already loaded from the YAML config (see automation_load_config.py).
+-- Variables: run_id, provider_db, provider_schema, stage_name, file_name, file_format, table_name, cleanroom_name, template_name, consumer_account, consumer_role, join_columns (array)
+
+-- 0. ASSIGN VARIABLES (example using snowsql variable syntax or scripting language)
+-- For illustration:
+-- !set variable_substitution=true
+-- SET run_id='20250805_001';
+-- SET provider_db='samsungdb';
+-- SET provider_schema='samsung_schema';
+-- SET stage_name='my_stage';
+-- SET file_name='myfile.csv';
+-- SET file_format='my_csv_format';
+-- SET table_name='Stage_Table_20250805_001';
+-- SET cleanroom_name='SAMSUNG_ARGOS_20250805_001';
+-- SET template_name='overlap_template_20250805_001';
+-- SET consumer_account='TA76655';
+-- SET consumer_role='SFPSCOGS.AM_DCR_CONSUMER';
+-- SET join_columns=ARRAY_CONSTRUCT('hashedEmails', 'device_id', 'user_id', 'phone_number', 'custom_col');
+
+-- === 1. DYNAMIC TABLE CREATION USING INFER_SCHEMA ===
+CREATE OR REPLACE TEMP TABLE _infer_schema_result AS
+SELECT * FROM TABLE(
+  INFER_SCHEMA(
+    LOCATION => '@' || $stage_name || '/' || $file_name,
+    FILE_FORMAT => $file_format
+  )
+);
+
+DECLARE create_stmt STRING;
+BEGIN
+  SELECT
+    'CREATE OR REPLACE TABLE ' || $provider_db || '.' || $provider_schema || '.' || $table_name || ' (' ||
+    LISTAGG(IDENTIFIER("NAME") || ' ' || "TYPE", ', ') ||
+    ');'
+  INTO :create_stmt
+  FROM _infer_schema_result;
+
+  EXECUTE IMMEDIATE :create_stmt;
+END;
+
+-- === 2. SNOWPIPE (ASSUMED PRECONFIGURED) LOADS DATA FROM STAGE TO NEW TABLE ===
+
+-- === 3. DCR SETUP (PARAMETERIZED, MULTI-COLUMN JOIN) ===
+
+USE ROLE samooha_app_role;
+
+CALL samooha_by_snowflake_local_db.provider.cleanroom_init($cleanroom_name, 'INTERNAL');
+CALL samooha_by_snowflake_local_db.provider.register_db($provider_db);
+
+CALL samooha_by_snowflake_local_db.provider.link_datasets(
+  $cleanroom_name,
+  [ $provider_db || '.' || $provider_schema || '.' || $table_name ]
+);
+
+-- Set the join policy for multiple columns
+DECLARE
+  join_policies ARRAY;
+  idx INT DEFAULT 0;
+  n INT;
+BEGIN
+  n := ARRAY_SIZE(join_columns);
+  join_policies := ARRAY_CONSTRUCT();
+  WHILE idx < n DO
+    join_policies := ARRAY_APPEND(join_policies, $provider_db || '.' || $provider_schema || '.' || $table_name || ':' || join_columns[idx]);
+    idx := idx+1;
+  END WHILE;
+  CALL samooha_by_snowflake_local_db.provider.set_join_policy($cleanroom_name, join_policies);
+END;
+
+-- === 4. DYNAMIC TEMPLATE: Build SQL based on up to 5 join columns ===
+DECLARE
+  template_sql STRING;
+  join_exprs STRING;
+  select_exprs STRING;
+  i INT DEFAULT 0;
+  n INT;
+BEGIN
+  n := ARRAY_SIZE(join_columns);
+
+  -- Build join condition and select expr
+  join_exprs := '';
+  select_exprs := '';
+  WHILE i < n DO
+    IF i > 0 THEN
+      join_exprs := join_exprs || ' AND ';
+      select_exprs := select_exprs || ', ';
+    END IF;
+    join_exprs := join_exprs || 'p.' || join_columns[i] || ' = c.' || join_columns[i];
+    select_exprs := select_exprs || 'c.' || join_columns[i];
+    i := i + 1;
+  END WHILE;
+
+  -- Build the overall SQL
+  template_sql := 'SELECT ' || select_exprs
+                  || ' FROM ' || $provider_db || '.' || $provider_schema || '.' || $table_name
+                  || ' p JOIN {{ my_table[0] }} c ON ' || join_exprs || ';';
+
+  CALL samooha_by_snowflake_local_db.provider.add_custom_sql_template(
+    $cleanroom_name,
+    $template_name,
+    template_sql
+  );
+END;
+
+CALL samooha_by_snowflake_local_db.provider.set_default_release_directive($cleanroom_name, 'V1_0', '0');
+
+CALL samooha_by_snowflake_local_db.provider.add_consumers(
+  $cleanroom_name,
+  $consumer_account,
+  $consumer_role
+);
+
+CALL samooha_by_snowflake_local_db.provider.create_or_update_cleanroom_listing($cleanroom_name);
+
+-- (Optional) View added templates and consumers for audit
+CALL samooha_by_snowflake_local_db.provider.view_added_templates($cleanroom_name);
+CALL samooha_by_snowflake_local_db.provider.view_consumers($cleanroom_name);
+
+-- (Optional) Unregister a consumer if needed
+-- CALL samooha_by_snowflake_local_db.provider.remove_consumers($cleanroom_name, $consumer_account);
+
+-- ========================================
+-- END OF CONFIG-DRIVEN PARAMETERIZED DCR WORKFLOW (MULTI-COLUMN JOIN, SFTP CONFIG)
+-- ========================================
+```
+**Instructions for the service user:**  
+- Just upload both your data file AND the config YAML file to the SFTP server.  
+- No Snowflake knowledge is required; the automation/orchestrator will pick up both and execute the workflow.
+
+**Instructions for automation/orchestrator:**  
+- Download the config YAML from SFTP.
+- Parse it, set variables, and run the parameterized Snowflake DCR workflow as above.
+- No manual edits to scripts or tables needed!
+
+
+
++----------------------+
+|   Service User PC    |
++----------------------+
+           |
+           | 1. SFTP upload:
+           |    - myfile.csv
+           |    - dcr_config_*.yaml
+           v
++----------------------+
+|      SFTP Server     |
+|    (/dropzone/)      |
++----------------------+
+           |
+           | 2. Automation/orchestrator polls SFTP
+           |    - Downloads data file and config file
+           v
++-------------------------------+
+|   Automation Host/Orchestrator|
+| (Python script or Airflow, etc)|
++-------------------------------+
+           |
+           | 3. Loads YAML config (dcr_config_*.yaml)
+           |    - Parses all Snowflake variables
+           |
+           | 4. Runs parameterized Snowflake script:
+           |    - Dynamic table creation via INFER_SCHEMA
+           |    - DCR setup (multi-column join, template, etc)
+           v
++-----------------------+
+|     Snowflake Cloud   |
+|   (Data, DCR logic)   |
++-----------------------+
+           |
+           | 5. DCR is live, consumers can access via Snowflake UI or API
+           v
++------------------------+
+|   Data Clean Room      |
+|   (for Argos, etc)     |
++------------------------+
+
+LEGEND:
+- Service User: only interacts with SFTP (no Snowflake knowledge needed)
+- SFTP Server: staging area for data + config files
+- Automation Host: runs scheduled job, parses config, orchestrates Snowflake
+- Snowflake: runs actual data load and DCR setup
+- DCR: secure data access for consumer
+
+Flow:
+1. Service user uploads data file and config YAML to SFTP
+2. Automation/orchestrator picks up both from SFTP
+3. Automation parses config, runs parameterized workflow in Snowflake
+4. Clean room is provisioned and shared with the consumer
+
