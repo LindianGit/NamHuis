@@ -1,4 +1,31 @@
- use database samsungdb;
+
+/*
+This script applies the follwing tables to the Data Clean Room
+select count(*) from SAMSUNGDB.SAMSUNG_SCHEMA.SEUK_GB_EN_AEP_CRM1_MX_FLIPPII_PROP96_100_SNOWFLAKE_EO  ',
+'SAMSUNGDB.SAMSUNG_SCHEMA.SEUK_GB_EN_AEP_CRM1_MX_FOLDPII_PROP91_100_SNOWFLAKE_EO',
+ select count(*) from SAMSUNGDB.SAMSUNG_SCHEMA.SEUK_GB_EN_AEP_CRM1_MX_FLIPPII_PROP91_100_SNOWFLAKE_EO 
+'SAMSUNGDB.SAMSUNG_SCHEMA.SEUK_GB_EN_AEP_CRM1_MX_FOLDPII_PROP96_100_SNOWFLAKE_EO'
+
+Run these stored procedures to generate the above tables:
+  call SAMSUNGDB.SAMSUNG_SCHEMA.SP_LOAD_STAGE_TABLE(); 
+  call samsungdb.samsung_schema.sp_split_stage_table_by_segment()
+
+Account Identifier: SAINSBURYS-SAINSBURYS
+Locator: https://sainsburys.eu-west-1.snowflakecomputing.com
+url: https://sainsburys-sainsburys.snowflakecomputing.com
+
+Permissions given to role:
+CREATE ROLE SFPSCOGS_AM_DCR_CONSUMER;
+GRANT USAGE ON DATABASE SAMSUNGDB TO ROLE SFPSCOGS_AM_DCR_CONSUMER;
+GRANT USAGE ON SCHEMA SAMSUNGDB.SAMSUNG_SCHEMA TO ROLE SFPSCOGS_AM_DCR_CONSUMER;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA SAMSUNGDB.SAMSUNG_SCHEMA TO ROLE SFPSCOGS_AM_DCR_CONSUMER;
+GRANT ALL PRIVILEGES ON FUTURE TABLES IN SCHEMA SAMSUNGDB.SAMSUNG_SCHEMA TO ROLE SFPSCOGS_AM_DCR_CONSUMER;
+
+https://docs.snowflake.com/en/user-guide/cleanrooms/custom-templates
+*/
+
+
+use database samsungdb;
 use schema samsung_schema;
 
 use role samooha_app_role;
@@ -9,15 +36,16 @@ USE WAREHOUSE app_wh;
 
 -- Step 4: Switch to Samooha application role for clean room configuration
 USE ROLE samooha_app_role;
-SET cleanroom_name = 'SAMSUNG_ARGOS';
+SET cleanroom_name = 'SAMSUNG';
+--get rid of samsung_argos clean room later 
 
 -- Step 5: Initialize the clean room
-CALL samooha_by_snowflake_local_db.provider.cleanroom_init($cleanroom_name, 'INTERNAL');
+CALL samooha_by_snowflake_local_db.provider.cleanroom_init($cleanroom_name, 'EXTERNAL');
 
 -- Step 6: Register the provider database so the clean room API layer can access it
 CALL samooha_by_snowflake_local_db.provider.register_db('samsungdb');
 
--- Step 7: Link the provider tables to the clean room --- this is where the source_table in the template comes from
+-- Step 7: Link the provider tables to the clean room
 CALL samooha_by_snowflake_local_db.provider.link_datasets($cleanroom_name,
   [
     'SAMSUNGDB.SAMSUNG_SCHEMA.SEUK_GB_EN_AEP_CRM1_MX_FLIPPII_PROP96_100_SNOWFLAKE_EO',
@@ -29,7 +57,7 @@ CALL samooha_by_snowflake_local_db.provider.link_datasets($cleanroom_name,
 
 CALL samooha_by_snowflake_local_db.provider.view_provider_datasets($cleanroom_name);
 
--- Step 8: Restrict joinable columns to hashedEmails only ON ALL TABLES
+-- Step 8: Restrict joinable columns to hashedEmails only ON ALL THESE TABLES
 CALL samooha_by_snowflake_local_db.provider.set_join_policy($cleanroom_name,
   [
     'SAMSUNGDB.SAMSUNG_SCHEMA.SEUK_GB_EN_AEP_CRM1_MX_FLIPPII_PROP96_100_SNOWFLAKE_EO:hashedEmails',
@@ -42,35 +70,58 @@ CALL samooha_by_snowflake_local_db.provider.set_join_policy($cleanroom_name,
 CALL samooha_by_snowflake_local_db.provider.view_join_policy($cleanroom_name);
 
 -- Step 10: Add the custom SQL template for allowed overlap join
-SET template_name = 'overlap_template';
+SET template_name = 'overlap_template1';
 
 -- If you want to allow the consumer to join to ANY of the 4 provider tables,
 -- you can let the template use the source_table parameter (as below),
 -- or create 4 different templates, one per table.
---Custom clean room template reference | Snowflake Documentation
+-- source_table[0] populated by step 7 
 CALL samooha_by_snowflake_local_db.provider.add_custom_sql_template( 
     $cleanroom_name, 
     $template_name, 
     $$ 
-        SELECT c.hashedEmails 
+        SELECT c.{{ consumer_join_id1 | sqlsafe}}, p.SEGMENTNAME 
         FROM identifier({{ source_table[0] }}) p 
         JOIN {{ my_table[0] }} c 
-        ON p.hashedEmails = c.hashedEmails; 
+        ON c.{{ consumer_join_id1 | sqlsafe}} = p.{{provider_join_id1 | sqlsafe}}; 
     $$ 
 ); 
 
+-- Set column policies. Column policies are tied to a specific template and table, so we
+-- needed to add the template first.
+CALL samooha_by_snowflake_local_db.provider.set_column_policy($cleanroom_name,
+  [$template_name || ':SAMSUNGDB.SAMSUNG_SCHEMA.SEUK_GB_EN_AEP_CRM1_MX_FLIPPII_PROP96_100_SNOWFLAKE_EO:SEGMENTNAME',
+   $template_name || ':SAMSUNGDB.SAMSUNG_SCHEMA.SEUK_GB_EN_AEP_CRM1_MX_FOLDPII_PROP91_100_SNOWFLAKE_EO:SEGMENTNAME',
+   $template_name || ':SAMSUNGDB.SAMSUNG_SCHEMA.SEUK_GB_EN_AEP_CRM1_MX_FLIPPII_PROP91_100_SNOWFLAKE_EO:SEGMENTNAME',
+   $template_name || ':SAMSUNGDB.SAMSUNG_SCHEMA.SEUK_GB_EN_AEP_CRM1_MX_FOLDPII_PROP96_100_SNOWFLAKE_EO:SEGMENTNAME']);
+
+CALL samooha_by_snowflake_local_db.provider.view_column_policy($cleanroom_name);
+
+
+
 CALL samooha_by_snowflake_local_db.provider.view_added_templates($cleanroom_name);
 
--- Step 11: Set default release directive (versioning for clean room)
+-- Step 11: versioning for clean room 
 CALL samooha_by_snowflake_local_db.provider.set_default_release_directive($cleanroom_name, 'V1_0', '0');
+
+
+
+
+
+
+
+
+
+
+--resume from here........once they deliver the account identifier. 
 
 -- Step 12: Share the clean room with the consumer account
 use role accountadmin;
 
 CALL samooha_by_snowflake_local_db.provider.add_consumers(
   $cleanroom_name,
-  'SAINSBURYS-SAINSBURYS', -- Consumer's Snowflake Account Identifier
-  'SFPSCOGS_AM_DCR_CONSUMER' -- Consumer's role for clean room access
+  'SAINSBURYS', -- Consumer's Snowflake Account Identifier
+  'SAINSBURYS.SAINSBURYS' -- Consumer's organisation & account name
 );
 
 CALL samooha_by_snowflake_local_db.provider.view_consumers($cleanroom_name);
@@ -80,3 +131,13 @@ CALL samooha_by_snowflake_local_db.provider.create_or_update_cleanroom_listing($
 
 -- Checks: see all tables currently linked
 CALL samooha_by_snowflake_local_db.provider.view_provider_datasets($cleanroom_name); 
+
+select current_account();
+--- Check if Argos has been added
+CALL samooha_by_snowflake_local_db.provider.view_consumers('SAMSUNG'); 
+
+ -- Verify consumers (after adding) 
+CALL samooha_by_snowflake_local_db.provider.view_consumers('SAMSUNG'); 
+ 
+
+ 
