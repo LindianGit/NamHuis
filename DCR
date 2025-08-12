@@ -1,31 +1,4 @@
-
-/*
-This script applies the follwing tables to the Data Clean Room
-select count(*) from SAMSUNGDB.SAMSUNG_SCHEMA.SEUK_GB_EN_AEP_CRM1_MX_FLIPPII_PROP96_100_SNOWFLAKE_EO  ',
-'SAMSUNGDB.SAMSUNG_SCHEMA.SEUK_GB_EN_AEP_CRM1_MX_FOLDPII_PROP91_100_SNOWFLAKE_EO',
- select count(*) from SAMSUNGDB.SAMSUNG_SCHEMA.SEUK_GB_EN_AEP_CRM1_MX_FLIPPII_PROP91_100_SNOWFLAKE_EO 
-'SAMSUNGDB.SAMSUNG_SCHEMA.SEUK_GB_EN_AEP_CRM1_MX_FOLDPII_PROP96_100_SNOWFLAKE_EO'
-
-Run these stored procedures to generate the above tables:
-  call SAMSUNGDB.SAMSUNG_SCHEMA.SP_LOAD_STAGE_TABLE(); 
-  call samsungdb.samsung_schema.sp_split_stage_table_by_segment()
-
-Account Identifier: SAINSBURYS-SAINSBURYS
-Locator: https://sainsburys.eu-west-1.snowflakecomputing.com
-url: https://sainsburys-sainsburys.snowflakecomputing.com
-
-Permissions given to role:
-CREATE ROLE SFPSCOGS_AM_DCR_CONSUMER;
-GRANT USAGE ON DATABASE SAMSUNGDB TO ROLE SFPSCOGS_AM_DCR_CONSUMER;
-GRANT USAGE ON SCHEMA SAMSUNGDB.SAMSUNG_SCHEMA TO ROLE SFPSCOGS_AM_DCR_CONSUMER;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA SAMSUNGDB.SAMSUNG_SCHEMA TO ROLE SFPSCOGS_AM_DCR_CONSUMER;
-GRANT ALL PRIVILEGES ON FUTURE TABLES IN SCHEMA SAMSUNGDB.SAMSUNG_SCHEMA TO ROLE SFPSCOGS_AM_DCR_CONSUMER;
-
-https://docs.snowflake.com/en/user-guide/cleanrooms/custom-templates
-*/
-
-
-use database samsungdb;
+ use database samsungdb;
 use schema samsung_schema;
 
 use role samooha_app_role;
@@ -70,8 +43,9 @@ CALL samooha_by_snowflake_local_db.provider.set_join_policy($cleanroom_name,
 CALL samooha_by_snowflake_local_db.provider.view_join_policy($cleanroom_name);
 
 -- Step 10: Add the custom SQL template for allowed overlap join
+/* Original working 
 SET template_name = 'overlap_template1';
-
+SET cleanroom_name = 'SAMSUNG';
 -- If you want to allow the consumer to join to ANY of the 4 provider tables,
 -- you can let the template use the source_table parameter (as below),
 -- or create 4 different templates, one per table.
@@ -82,10 +56,28 @@ CALL samooha_by_snowflake_local_db.provider.add_custom_sql_template(
     $$ 
         SELECT c.{{ consumer_join_id1 | sqlsafe}}, p.SEGMENTNAME 
         FROM identifier({{ source_table[0] }}) p 
-        JOIN {{ my_table[0] }} c 
+        JOIN identifier({{ my_table[0] }}) c
         ON c.{{ consumer_join_id1 | sqlsafe}} = p.{{provider_join_id1 | sqlsafe}}; 
     $$ 
 ); 
+*/ 
+
+SET template_name = 'overlap_template1';
+SET cleanroom_name = 'SAMSUNG';
+
+CALL samooha_by_snowflake_local_db.provider.add_custom_sql_template( 
+    $cleanroom_name, 
+    $template_name, 
+    $$
+        SELECT p.SEGMENTNAME, COUNT(*) AS SEGMENT_COUNT
+        FROM identifier({{ source_table[0] }}) p
+        JOIN identifier({{ my_table[0] }}) c
+        ON c.{{ consumer_join_id1 | sqlsafe}} = p.{{ provider_join_id1 | sqlsafe}}
+        GROUP BY p.SEGMENTNAME
+    $$
+);
+
+
 
 -- Set column policies. Column policies are tied to a specific template and table, so we
 -- needed to add the template first.
@@ -104,16 +96,6 @@ CALL samooha_by_snowflake_local_db.provider.view_added_templates($cleanroom_name
 -- Step 11: versioning for clean room 
 CALL samooha_by_snowflake_local_db.provider.set_default_release_directive($cleanroom_name, 'V1_0', '0');
 
-
-
-
-
-
-
-
-
-
---resume from here........once they deliver the account identifier. 
 
 -- Step 12: Share the clean room with the consumer account
 use role accountadmin;
@@ -138,6 +120,3 @@ CALL samooha_by_snowflake_local_db.provider.view_consumers('SAMSUNG');
 
  -- Verify consumers (after adding) 
 CALL samooha_by_snowflake_local_db.provider.view_consumers('SAMSUNG'); 
- 
-
- 
