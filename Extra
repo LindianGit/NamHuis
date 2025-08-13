@@ -1,7 +1,7 @@
- As the Lead Snowflake Developer at Samsung, I played a pivotal role in architecting, implementing, and securing our enterprise Snowflake environment to enable advanced data sharing and analytics. My contributions included:
+ As the Lead Snowflake Data Engineer at Samsung, I am  playing  a pivotal role in architecting, implementing, and securing our brand new enterprise Snowflake environment to enable advanced data sharing and analytics. My contributions so far include:
 
 Deployment & Integration: Successfully installed and configured the Data Clean Room (DCR) application within Snowflake, enabling secure and privacy-compliant data collaboration.
-Automation & Scripting: Developed robust scripts for DCR creation, including end-to-end workflows for linking DCRs and automating the creation of reusable DCR templates for seamless integration with external data consumers.
+Automation & Scripting: Developed robust scripts for DCR creation, including end-to-end workflows for linking DCRs and automating the creation of reusable DCR templates for seamless integration with external data consumers. I also developed Snowflake Stored Procedures using JavaScript and SQL to extract data from Snowflake stages, then load the data into the Samsung Snowflake database. 
 Security & Compliance:
 Defined and enforced network policies to restrict access based on IP addresses.
 Implemented strict password policies, including automated account lockouts after five unsuccessful login attempts.
@@ -11,13 +11,11 @@ Set up automated user deactivation for accounts inactive for over 90 days.
 Environment Setup:
 Led the initial setup of the Snowflake environment, including databases, stages, views, users, and roles.
 Orchestrated the integration between SFTP servers and Snowflake to facilitate secure data transfers.
-Guided the team in implementing key pair authentication, ensuring secure and automated connections between servers and Snowflake.
+Stepped in to assist when an external team was experiencing prolonged difficulties connecting the SFTP server to Snowflake, and provided guidance on implementing key pair authentication to enable secure  connections between the server and Snowflake. 
 Data Pipeline Development:
 Designed and implemented processes for copying data from servers to Snowflake stages using stored procedures, and efficiently loading data into Snowflake tables.
 Auditing & Monitoring: Established comprehensive auditing and monitoring procedures to maintain data integrity and track usage across the platform.
 Architecture & Documentation: Made significant contributions to the overall data architecture, including creating detailed architectural diagrams and facilitating technical discussions.
 Stakeholder Support: Provided ongoing support to DCR consumers, including approving and developing new DCR templates for diverse data clean room use cases.
-Through these initiatives, I helped Samsung establish a scalable, secure, and efficient Snowflake ecosystem that empowers data-driven decision-making and collaboration across teams and partners.
-
-
-https://www.examtopics.com/exams/snowflake/snowpro-advanced-architect/view/
+Provided successful assistance to unrelated teams in need of data conversions from one data type to another data type after their initial attempts of conversions failed. 
+Through these initiatives, I helped Samsung establish a scalable, secure, and efficient Snowflake ecosystem from scratch that empowers data-driven decision-making and collaboration across teams and partners.
