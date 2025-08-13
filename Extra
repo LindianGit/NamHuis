@@ -20,3 +20,29 @@ Stakeholder Support: Provided ongoing support to DCR consumers, including approv
 Provided successful assistance to unrelated teams in need of data conversions from one data type to another data type after their initial attempts of conversions failed. 
 Through these initiatives, I helped Samsung establish a scalable, secure, and efficient Snowflake ecosystem from scratch that empowers data-driven decision-making and collaboration across teams and partners.
 Wrote substantial documentation detailing the entire DCR project from end to end. 
+
+==========================
+
+Certainly! Here’s a concise, impactful LinkedIn summary incorporating your seniority, leadership, technical achievements, quantifiable value, and the unique, high-profile nature of your work with Samsung and Argos.
+
+---
+
+**Lead Snowflake Data Engineer | Samsung**
+
+As Lead Snowflake Data Engineer at Samsung, I architected and delivered a multi-million euro, first-of-its-kind Data Clean Room initiative in partnership with Argos—pioneering a new way to securely share data for joint marketing campaigns. The project was delivered on time, enabling all marketing activities to launch as scheduled and setting a new benchmark for privacy-compliant data collaboration.
+
+**Key Achievements:**
+- **Greenfield Snowflake Platform:** Led the end-to-end setup of Samsung’s enterprise Snowflake data environment, including architecture, security, databases, roles, and integrations.
+- **Data Clean Room (DCR) Deployment:** Designed, installed, and automated the DCR application within Snowflake, enabling secure, privacy-first data sharing and analytics between Samsung and Argos.
+- **Automation & Scripting:** Developed robust, reusable scripts and end-to-end workflows for DCR creation and integration, including JavaScript/SQL stored procedures for data extraction and loading.
+- **Security & Compliance:** Enforced strict policies—network/IP whitelisting, password and session controls, RBAC, and automated account management—to ensure enterprise-level data protection.
+- **Integration & Troubleshooting:** Orchestrated seamless SFTP-to-Snowflake integration and resolved complex connectivity issues for external teams, including secure key pair setups.
+- **Pipeline & Operations:** Built and optimized data pipelines for efficient, auditable data transfers and established comprehensive monitoring and auditing for ongoing data integrity.
+- **Documentation & Knowledge Sharing:** Authored detailed end-to-end documentation and provided expert support to both internal and partner teams, accelerating onboarding and adoption.
+
+**Impact:**  
+Helped Samsung and Argos unlock new marketing opportunities through secure, scalable data collaboration. Successfully led cross-company technical teams, met all delivery milestones, and established a future-proof Snowflake ecosystem supporting data-driven decision-making at scale.
+
+---
+
+Would you like a version with bullet points only, or further shortened for maximum LinkedIn scan-ability?
