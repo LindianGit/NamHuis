@@ -11,7 +11,7 @@ Set up automated user deactivation for accounts inactive for over 90 days.
 Environment Setup:
 Led the initial setup of the Snowflake environment, including databases, stages, views, users, and roles.
 Orchestrated the integration between SFTP servers and Snowflake to facilitate secure data transfers.
-Stepped in to assist when an external team was experiencing prolonged difficulties connecting the SFTP server to Snowflake, and provided guidance on implementing key pair authentication to enable secure  connections between the server and Snowflake. 
+Stepped in to assist when an external team was experiencing prolonged difficulties connecting the SFTP server to Snowflake, and provided guidance on implementing Snowflake key pair authentication to enable secure  connections between the server and Snowflake. 
 Data Pipeline Development:
 Designed and implemented processes for copying data from servers to Snowflake stages using stored procedures, and efficiently loading data into Snowflake tables.
 Auditing & Monitoring: Established comprehensive auditing and monitoring procedures to maintain data integrity and track usage across the platform.
@@ -19,3 +19,4 @@ Architecture & Documentation: Made significant contributions to the overall data
 Stakeholder Support: Provided ongoing support to DCR consumers, including approving and developing new DCR templates for diverse data clean room use cases.
 Provided successful assistance to unrelated teams in need of data conversions from one data type to another data type after their initial attempts of conversions failed. 
 Through these initiatives, I helped Samsung establish a scalable, secure, and efficient Snowflake ecosystem from scratch that empowers data-driven decision-making and collaboration across teams and partners.
+Wrote substantial documentation detailing the entire DCR project from end to end. 
